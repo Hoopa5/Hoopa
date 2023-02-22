@@ -1,45 +1,63 @@
-# IMPORT DISCORD.PY. ALLOWS ACCESS TO DISCORD'S API.
+# Import discord.py. Allows access to Discord's API.
 import discord
 
-# IMPORT THE OS MODULE.
+# Import the os module.
 import os
 
-# IMPORT LOAD_DOTENV FUNCTION FROM DOTENV MODULE.
+# Import load_dotenv function from dotenv module.
 from dotenv import load_dotenv
 
-# LOADS THE .ENV FILE THAT RESIDES ON THE SAME LEVEL AS THE SCRIPT.
+# Import commands from the discord.ext module.
+from discord.ext import commands
+
+# Loads the .env file that resides on the same level as the script.
 load_dotenv()
 
-# GRAB THE API TOKEN FROM THE .ENV FILE.
+# Grab the API token from the .env file.
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
-# GETS THE CLIENT OBJECT FROM DISCORD.PY. CLIENT IS SYNONYMOUS WITH BOT.
-bot = discord.Client()
+# Creates a new Bot object with a specified prefix. It can be whatever you want it to be.
+bot = commands.Bot(command_prefix="$")
 
-# EVENT LISTENER FOR WHEN THE BOT HAS SWITCHED FROM OFFLINE TO ONLINE.
-@bot.event
-async def on_ready():
-	# CREATES A COUNTER TO KEEP TRACK OF HOW MANY GUILDS / SERVERS THE BOT IS CONNECTED TO.
-	guild_count = 0
-
-	# LOOPS THROUGH ALL THE GUILD / SERVERS THAT THE BOT IS ASSOCIATED WITH.
-	for guild in bot.guilds:
-		# PRINT THE SERVER'S ID AND NAME.
-		print(f"- {guild.id} (name: {guild.name})")
-
-		# INCREMENTS THE GUILD COUNTER.
-		guild_count = guild_count + 1
-
-	# PRINTS HOW MANY GUILDS / SERVERS THE BOT IS IN.
-	print("SampleDiscordBot is in " + str(guild_count) + " guilds.")
-
-# EVENT LISTENER FOR WHEN A NEW MESSAGE IS SENT TO A CHANNEL.
+# on_message() event listener. Notice it is using @bot.event as opposed to @bot.command().
 @bot.event
 async def on_message(message):
-	# CHECKS IF THE MESSAGE THAT WAS SENT IS EQUAL TO "HELLO".
+	# Check if the message sent to the channel is "hello".
 	if message.content == "hello":
-		# SENDS BACK A MESSAGE TO THE CHANNEL.
-		await message.channel.send("Hello bro/sis")
+		# Sends a message to the channel.
+		await message.channel.send("pies are better than cakes. change my mind.")
 
-# EXECUTES THE BOT WITH THE SPECIFIED TOKEN. TOKEN HAS BEEN REMOVED AND USED JUST AS AN EXAMPLE.
+	# Includes the commands for the bot. Without this line, you cannot trigger your commands.
+	await bot.process_commands(message)
+
+# Command $ping. Invokes only when the message "$ping" is send in the Discord server.
+# Alternatively @bot.command(name="ping") can be used if another function name is desired.
+@bot.command(
+	# Adds this value to the $help ping message.
+	help="Uses come crazy logic to determine if pong is actually the correct value or not.",
+	# Adds this value to the $help message.
+	brief="Prints pong back to the channel."
+)
+async def ping(ctx):
+	# Sends a message to the channel using the Context object.
+	await ctx.channel.send("pong")
+
+# Command $print. This takes an in a list of arguments from the user and simply prints the values back to the channel.
+@bot.command(
+	# Adds this value to the $help print message.
+	help="Looks like you need some help.",
+	# Adds this value to the $help message.
+	brief="Prints the list of values back to the channel."
+)
+async def print(ctx, *args):
+	response = ""
+
+	# Loops through the list of arguments that the user inputs.
+	for arg in args:
+		response = response + " " + arg
+
+	# Sends a message to the channel using the Context object.
+	await ctx.channel.send(response)
+
+# Executes the bot with the specified token. Token has been removed and used just as an example.
 bot.run(DISCORD_TOKEN)
